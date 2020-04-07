@@ -19,6 +19,9 @@
             padding-top: 100px;
             text-align: center;
             font-size: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .row {
@@ -133,7 +136,7 @@
 
                 document.addEventListener('mousedown', function(e) {
                     const className = e.target.className;
-                    if (className.match(/row/g) || className.match(/square/g)) {
+                    if (className.match(/square/g)) {
                         point.x = e.clientX;
                         point.y = e.clientY;                        
                         document.body.append($selectBox);
