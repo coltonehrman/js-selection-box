@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Box</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100%;
+            padding-top: 100px;
+            text-align: center;
+            font-size: 0;
+        }
+
+        .row {
+            font-size: 0;
+            margin: 0;
+            display: inline-block;
+        }
+
+        .square {
+            -webkit-user-select: none;  /* Chrome all / Safari all */
+            -moz-user-select: none;     /* Firefox all */
+            -ms-user-select: none;      /* IE 10+ */
+            user-select: none;          /* Likely future */   
+            width: 75px;
+            height: 75px;
+            border: 2.5px solid darkturquoise;
+            background-color: transparent;
+            display: inline-block;
+            margin: 3.5px;
+        }
+
+        .square.selected {
+            background-color: turquoise;
+        }
+
+        .select-box {
+            position: absolute;
+            background-color: black;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+        </div>
+        <div class="row">
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+        </div>
+        <div class="row">
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+        </div>
+        <div class="row">
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+        </div>
+        <div class="row">
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+        </div>
+        <div class="row">
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+        </div>
+    </div>
+    <script>
+        (() => {
+            const $ = document.querySelector.bind(document);
+            $.all = document.querySelectorAll.bind(document);
+
+            function createElememt(html) {
+                const $div = document.createElement('div');
+                $div.innerHTML = html.trim();
+                return $div.firstChild;
+            }
+
+            function overlap1D(b1, b2) {
+                return b1.max >= b2.min && b2.max >= b1.min;
+            }
+
+            window.onload = () => { 
+                let selecting = false;
+                let point = { x: 0, y: 0 };
+
+                const $selectBox = createElememt(`
+                <div class="select-box"></div>
+                `);
+
+                document.addEventListener('mousedown', function(e) {
+                    const className = e.target.className;
+                    if (className.match(/row/g) || className.match(/square/g)) {
+                        point.x = e.clientX;
+                        point.y = e.clientY;                        
+                        document.body.append($selectBox);
+                        selecting = true;
+                    }
+                });
+
+                document.addEventListener('mousemove', function(e) {
+                    if (selecting) {
+                        const screenBounds = document.body.getBoundingClientRect();
+                        const deltaX = point.x - e.clientX;
+                        const deltaY = point.y - e.clientY;
+                        
+                        if (deltaX > 0 && deltaY > 0) {
+                            // user is dragging top left
+                            // reset select box position
+                            $selectBox.style.top = '';
+                            $selectBox.style.left = '';
+
+                            // set new pivot point
+                            $selectBox.style.bottom = `${screenBounds.height - point.y}px`;
+                            $selectBox.style.right = `${screenBounds.width - point.x}px`;
+
+                            // change box size
+                            $selectBox.style.width = `${deltaX}px`;
+                            $selectBox.style.height = `${deltaY}px`;
+                        } else if (deltaX > 0 && deltaY < 0) {
+                            // user is dragging bottom left
+                            // reset select box position
+                            $selectBox.style.bottom = '';
+                            $selectBox.style.left = '';
+
+                            // set new pivot point
+                            $selectBox.style.top = `${point.y}px`;
+                            $selectBox.style.right = `${screenBounds.width - point.x}px`;
+
+                            // change box size
+                            $selectBox.style.width = `${deltaX}px`;
+                            $selectBox.style.height = `${deltaY * -1}px`;
+                        } else if (deltaX < 0 && deltaY > 0) {
+                            // user is dragging top right
+                            // reset select box position
+                            $selectBox.style.top = '';
+                            $selectBox.style.right = '';
+
+                            // set new pivot point
+                            $selectBox.style.bottom = `${screenBounds.height - point.y}px`;
+                            $selectBox.style.left = `${point.x}px`;
+                            
+                            // change box size
+                            $selectBox.style.width = `${deltaX * -1}px`;
+                            $selectBox.style.height = `${deltaY}px`;
+                        } else if (deltaX < 0 && deltaY < 0) {
+                            // user is dragging bottom right
+                            // reset select box position
+                            $selectBox.style.bottom = '';
+                            $selectBox.style.right = '';
+
+                            // set new pivot point
+                            $selectBox.style.top = `${point.y}px`;
+                            $selectBox.style.left = `${point.x}px`;
+                            
+                            // change box size
+                            $selectBox.style.width = `${deltaX * -1}px`;
+                            $selectBox.style.height = `${deltaY * -1}px`;
+                        }
+
+                        const sb = $selectBox.getBoundingClientRect();
+                        
+                        const b1 = {
+                            x: { min: sb.left, max: sb.right },
+                            y: { min: sb.top, max: sb.bottom },
+                        };
+
+                        const $squares = $.all('.square');
+
+                        if (sb.left != 0 && sb.right != 0) {
+                            $squares.forEach($square => {
+                                const b = $square.getBoundingClientRect();
+
+                                const b2 = {
+                                    x: { min: b.left, max: b.right },
+                                    y: { min: b.top, max: b.bottom },
+                                };
+
+                                // check if boxes overlap
+                                if (overlap1D(b1.x, b2.x) && overlap1D(b1.y, b2.y)) {
+                                    $square.classList.add('selected');
+                                } else {
+                                    $square.classList.remove('selected');
+                                }
+                            });
+                        }
+                    }
+                });
+
+                document.addEventListener('mouseup', function(e) {
+                    if (selecting) {
+                        // reset select box position
+                        $selectBox.style.top = '';
+                        $selectBox.style.bottom = '';
+                        $selectBox.style.right = '';
+                        $selectBox.style.left = '';
+
+                        // reset select box size
+                        $selectBox.style.width = '';
+                        $selectBox.style.height = '';
+
+                        document.body.removeChild($selectBox);
+                        selecting = false;
+                    }
+                });
+            };
+        })();
+    </script>
+</body>
+</html>
